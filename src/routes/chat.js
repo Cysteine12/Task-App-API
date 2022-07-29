@@ -3,47 +3,34 @@ const express = require('express')
 const router = express.Router()
 const passport = require('passport')
 
-
 // -----------Controller---------//
-const PostController = require('../controllers/postController')
+const ChatController = require('../controllers/chatController')
 
 
 // -----------Router---------//
 
 router.get(
-    '/', 
+    '/get-chat-list-alert',
     passport.authenticate('jwt', { session: false }), 
-    PostController.index
+    ChatController.getChatListAlerts
 )
 
 router.get(
-    '/owner/:ownerId/:pageId?', 
+    '/get-chat-list',
     passport.authenticate('jwt', { session: false }), 
-    PostController.findByOwner
+    ChatController.getChatList
 )
 
 router.post(
-    '/', 
+    '/get-chat',
     passport.authenticate('jwt', { session: false }), 
-    PostController.store
-)
-
-router.get(
-    '/:id', 
-    passport.authenticate('jwt', { session: false }), 
-    PostController.show
+    ChatController.getChat
 )
 
 router.put(
-    '/:id', 
+    '/save-chat',
     passport.authenticate('jwt', { session: false }), 
-    PostController.update
-)
-
-router.delete(
-    '/:id', 
-    passport.authenticate('jwt', { session: false }), 
-    PostController.destroy
+    ChatController.saveChat
 )
 
 

@@ -53,6 +53,12 @@ app.use('/api/user', user)
 const post = require('./src/routes/post')
 app.use('/api/post', post)
 
+const chat = require('./src/routes/chat')
+app.use('/api/chat', chat)
+
+const notification = require('./src/routes/notification')
+app.use('/api/notification', notification)
+
 
 //=======........========//
 const port = process.env.PORT || 5000

@@ -1,7 +1,8 @@
+const mongoose = require('mongoose')
 const User = require('../models/User')
 const Post = require('../models/Post')
 const Notification = require('../models/Notification')
-const Chat = require('../models/Chat')
+
 
 const follow = async (req, res) => {
     try {
@@ -20,13 +21,20 @@ const follow = async (req, res) => {
                             $push: { follower: user._id }
                         })
                     ])
-                    const notification = new Notification({
+                    const isExist = await Notification.findOne({ 
                         senderId: req.user._id,
                         recieverId: req.body.following,
-                        type: 'Follower',
-                        body: 'Hey, ' + req.user.name + ' is now following you',
+                        type: 'Follower'
                     })
-                    await notification.save()
+                    if (!isExist) {
+                        const notification = new Notification({
+                            senderId: req.user._id,
+                            recieverId: req.body.following,
+                            type: 'Follower',
+                            body: 'Hey, ' + req.user.name + ' is now following you',
+                        })
+                        await notification.save()
+                    }
                     data = 'Done!'
                 } else {
                     data = 'Already following'
@@ -64,17 +72,65 @@ const follow = async (req, res) => {
 const timeline = async (req, res) => {
     try {
         const user = await User.findById(req.params.userId)
-        const myPosts = await Post.find({ userId: req.params.userId }).sort({ createdAt: -1 })
-        const userFollowings = await Promise.all(
-            user.following.map(followingId => {
-                return Post.find({ userId: followingId }).sort({ createdAt: -1 })
-            })
-        )
-        const data = [...new Set(myPosts.concat(...userFollowings))]
+        user.following.push(String(user._id))
+        const postsId = user.following.map(followingId => {
+            return new mongoose.Types.ObjectId(followingId)
+        })
+
+        const postCount = await Post.find({
+            userId: {
+                $in: user.following
+            }
+        }).count('postCount')
+
+        const data = await Post.aggregate([
+            {
+                $match: {
+                    userId: {
+                        $in: postsId
+                    }
+                }
+            },
+            {
+                $sort: {
+                    createdAt: -1
+                }
+            },
+            {
+                $skip: (req.params.pageId - 1) * 2
+            },
+            {
+                $limit: 2
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'userId',
+                    foreignField: '_id',
+                    as: 'user'
+                }
+            },
+            {
+                $unwind: '$user'
+            },
+            {
+                $project: {
+                    'user._id': 0,
+                    'user.email': 0,
+                    'user.password': 0,
+                    'user.phone': 0,
+                    'user.follower': 0,
+                    'user.following': 0,
+                    'user.savedEvent': 0,
+                    'user.createdAt': 0,
+                    'user.updatedAt': 0
+                }
+            }
+        ])
 
         res.status(200).json({ 
             success: true,
-            data: data
+            data: { data, postCount }
         })
     } catch (err) {
         res.status(404).json({ err })
@@ -84,16 +140,8 @@ const timeline = async (req, res) => {
 const profile = async (req, res) => {
     try {
         const { id } = req.params
-        const data = await User.findById(id)
-        const user = {
-            _id: data._id,
-            name: data.name,
-            email: data.email,
-            phone: data.phone,
-            photo: data.photo,
-            follower: data.follower,
-            following: data.following
-        }
+        const user = await User.findById(id)
+        .select('_id name email phone photo follower following')
 
         res.status(200).json({ 
             success: true,
@@ -107,14 +155,60 @@ const profile = async (req, res) => {
 const getEvent = async (req, res) => {
     try {
         const user = req.user
-        const userEvents = await Promise.all(
-            user.savedEvent.map(eventId => {
-                return Post.find({ _id: eventId }).sort({ createdAt: -1 })
-            })
-        )
+        const eventsId = user.savedEvent.map(savedEventId => {
+            return new mongoose.Types.ObjectId(savedEventId)
+        })
+
+        const eventCount = user.savedEvent.length
+        
+        const data = await Post.aggregate([
+            {
+                $match: {
+                    _id: {
+                        $in: eventsId
+                    } 
+                }
+            },
+            {
+                $sort: {
+                    createdAt: -1
+                }
+            },
+            {
+                $skip: (req.params.pageId - 1) * 2
+            },
+            {
+                $limit: 2
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'userId',
+                    foreignField: '_id',
+                    as: 'user'
+                }
+            },
+            {
+                $unwind: '$user'
+            },
+            {
+                $project: {
+                    'user._id': 0,
+                    'user.email': 0,
+                    'user.password': 0,
+                    'user.phone': 0,
+                    'user.follower': 0,
+                    'user.following': 0,
+                    'user.savedEvent': 0,
+                    'user.createdAt': 0,
+                    'user.updatedAt': 0
+                }
+            }
+        ])
+
         res.status(200).json({ 
             success: true,
-            data: userEvents
+            data: { data, eventCount }
         })
     } catch (err) {
         res.status(404).json({ err })
@@ -163,10 +257,16 @@ const saveEvent = async (req, res) => {
     }
 }
 
-const getNotification = async (req, res) => {
+const follower = async (req, res) => {
     try {
-        const userId = req.user._id
-        const data = await Notification.find({ recieverId: userId }).sort({ createdAt: -1 })
+        const userId = req.params.userId
+        const user = await User.findById(userId).select('follower')
+        
+        const data = await User.find({
+            _id: {
+                $in: user.follower
+            } 
+        }).select('_id name photo').sort({ createdAt: -1 })
 
         res.status(200).json({ 
             success: true,
@@ -177,131 +277,20 @@ const getNotification = async (req, res) => {
     }
 }
 
-const getChatList = async (req, res) => {
+const following = async (req, res) => {
     try {
-        const userId = req.user._id
-        const chats = await Chat.find({
-            $or: [
-                {
-                    userA: userId
-                },
-                {
-                    userB: userId
-                }
-            ]
-        })
-        const newChats = await Promise.all(
-            chats.map(async (chat) => {
-                let id = null
-                if (chat.userA != userId) {
-                    id = chat.userB
-                } else {
-                    id = chat.userA
-                }
-                const user = await User.findById(id).select('name')
-                const message = chat.message[chat.message.length - 1].message
-                const trimMessage = message.split(' ').slice(0, 6).join(' ')
-
-                return {
-                    _id: chat._id,
-                    name: user.name,
-                    userA: chat.userA,
-                    userB: chat.userB,
-                    message: trimMessage,
-                    createdAt: chat.createdAt
-                }
-            })
-        )
-        res.status(200).json({ 
-            success: true,
-            data: newChats
-        })
-    } catch (err) {
-        res.status(404).json({ err })
-    }
-}
-
-const getChat = async (req, res) => {
-    try {
-        const userId = req.user._id
-        const friendId = req.body.friendId
-        const data = await Chat.findOne({
-            $or: [
-                {
-                    userA: userId,
-                    userB: friendId,
-                },
-                {
-                    userA: friendId,
-                    userB: userId,
-                }
-            ]
-        })
+        const userId = req.params.userId
+        const user = await User.findById(userId).select('following')
         
+        const data = await User.find({
+            _id: {
+                $in: user.following
+            } 
+        }).select('_id name photo').sort({ createdAt: -1 })
+
         res.status(200).json({ 
             success: true,
             data: data
-        })
-    } catch (err) {
-        res.status(404).json({ err })
-    }
-}
-
-const saveChat = async (req, res) => {
-    try {
-        const { friendId, message } = req.body
-        const userId = req.user._id
-
-        const data = await Chat.findOne({
-            $or: [
-                {
-                    userA: userId,
-                    userB: friendId,
-                },
-                {
-                    userA: friendId,
-                    userB: userId,
-                }
-            ]
-        })
-        if (data == null) {
-            const chat = new Chat({
-                userA: userId,
-                userB: friendId,
-                message: {
-                    userId: userId,
-                    message: message,
-                    createdAt: Date.now()
-                }
-            })
-            await chat.save()
-        } else {
-            await Chat.findOneAndUpdate({
-                $or: [
-                    {
-                        userA: userId,
-                        userB: friendId,
-                    },
-                    {
-                        userA: friendId,
-                        userB: userId,
-                    }
-                ]
-            }, {
-                $push: { 
-                    message: {
-                        userId: userId,
-                        message: message,
-                        createdAt: Date.now()
-                    }
-                }
-            })
-        }
-        
-
-        res.status(200).json({ 
-            success: true,
-            msg: 'Message sent!'
         })
     } catch (err) {
         res.status(404).json({ err })
@@ -311,11 +300,15 @@ const saveChat = async (req, res) => {
 const search = async (req, res) => {
     try {
         const { name } = req.params
+        const { _id } = req.user
         const data = await User.find({
             $text: {
                 $search: name
+            },
+            _id: {
+                $nin: [_id]
             }
-        })
+        }).select('_id name photo')
 
         res.status(200).json({ 
             success: true,
@@ -326,15 +319,14 @@ const search = async (req, res) => {
     }
 }
 
+
 module.exports = {
     follow,
     timeline,
     profile,
     getEvent,
     saveEvent,
-    getNotification,
-    getChatList,
-    getChat,
-    saveChat,
+    follower,
+    following,
     search
 }

@@ -16,7 +16,7 @@ router.put(
 )
 
 router.get(
-    '/timeline/:userId',
+    '/timeline/:userId/:pageId?',
     passport.authenticate('jwt', { session: false }), 
     UserController.timeline
 )
@@ -28,7 +28,7 @@ router.get(
 )
 
 router.get(
-    '/get-event',
+    '/get-event/:pageId?',
     passport.authenticate('jwt', { session: false }), 
     UserController.getEvent
 )
@@ -40,27 +40,15 @@ router.put(
 )
 
 router.get(
-    '/get-notification',
+    '/get-follower/:userId',
     passport.authenticate('jwt', { session: false }), 
-    UserController.getNotification
+    UserController.follower
 )
 
 router.get(
-    '/get-chat-list',
+    '/get-following/:userId',
     passport.authenticate('jwt', { session: false }), 
-    UserController.getChatList
-)
-
-router.post(
-    '/get-chat',
-    passport.authenticate('jwt', { session: false }), 
-    UserController.getChat
-)
-
-router.put(
-    '/save-chat',
-    passport.authenticate('jwt', { session: false }), 
-    UserController.saveChat
+    UserController.following
 )
 
 router.get(

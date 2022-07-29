@@ -10,7 +10,7 @@ module.exports = (passport) => {
     }, 
     async (payload, done) => {
         try {
-            const user = await User.findOne({ email: payload.email })
+            const user = await User.findOne({ _id: payload._id })
             if(user) {
                 return done(null, user)
             } else {

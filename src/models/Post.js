@@ -5,10 +5,6 @@ const postSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User'
     },
-    name: {
-        type: String,
-        required: true,
-    },
     course: {
         type: String,
         required: true,

@@ -1,7 +1,7 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "A user task managment app",
+  "description": "A user task management app",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Cysteine12/Task-App.git"
+    "url": "git+https://github.com/Cysteine12/Task-App-API.git"
   },
   "author": "Cysteine",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Cysteine12/Task-App/issues"
+    "url": "https://github.com/Cysteine12/Task-App-API/issues"
   },
-  "homepage": "https://github.com/Cysteine12/Task-App#readme",
+  "homepage": "https://github.com/Cysteine12/Task-App-API#readme",
   "dependencies": {
     "aws-sdk": "^2.1062.0",
     "connect-mongo": "^4.6.0",

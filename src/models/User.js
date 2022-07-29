@@ -19,8 +19,7 @@ const userSchema = new Schema({
         required: true,
     },
     photo: {
-        type: String,
-        default: 'img/user.png',
+        type: String
     },
     follower: {
         type: Array,

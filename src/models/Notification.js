@@ -11,6 +11,7 @@ const notificationSchema = new Schema({
     },
     type: {
         type: String,
+        enum: ['Follower'],
         required: true
     },
     body: {

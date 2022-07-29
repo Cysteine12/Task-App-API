@@ -16,7 +16,6 @@ router.get('/', AuthController.index)
 
 router.post(
     '/register', 
-    upload.single('photo'), 
     AuthController.register
 )
 
@@ -30,9 +29,15 @@ router.get(
 
 router.put(
     '/update/:id', 
-    upload.single('photo'),
     passport.authenticate('jwt', { session: false }), 
     AuthController.update
+)
+
+router.put(
+    '/update-photo/:id', 
+    upload.single('photo'),
+    passport.authenticate('jwt', { session: false }), 
+    AuthController.updatePhoto
 )
 
 router.delete(

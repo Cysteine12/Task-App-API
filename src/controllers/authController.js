@@ -112,17 +112,31 @@ const update = async (req, res) => {
             name: req.body.name,
             email: req.body.email,
             password: req.body.password,
-            phone: req.body.phone,
-            photo: req.file.location,
-            follower: req.body.follower,
-            following: req.body.following,
-            savedEvent: req.body.savedEvent
+            phone: req.body.phone
         }
         const data = await User.updateOne({ _id: id}, user)
 
         res.status(200).json({ 
             success: true,
             msg: 'Profile updated successfully!',
+        })
+    } catch (err) {
+        res.status(404).json({ err })
+    }
+}
+
+const updatePhoto = async (req, res) => {
+    try {
+        const { id } = req.params
+
+        const user = {
+            photo: req.file.location
+        }
+        const data = await User.updateOne({ _id: id}, user)
+
+        res.status(200).json({ 
+            success: true,
+            msg: 'Photo updated successfully!',
         })
     } catch (err) {
         res.status(404).json({ err })
@@ -150,5 +164,6 @@ module.exports = {
     login,
     profile,
     update,
+    updatePhoto,
     destroy
 }

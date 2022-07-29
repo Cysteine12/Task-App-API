@@ -1,4 +1,5 @@
 const Post = require('../models/Post')
+const User = require('../models/User')
 
 const index = async (req, res) => {
     try {
@@ -16,11 +17,35 @@ const index = async (req, res) => {
 const findByOwner = async (req, res) => {
     try {
         const { ownerId } = req.params
-        const data = await Post.find({ userId: ownerId }).sort({ createdAt: -1 })
+        const owner = await User.findById(ownerId).select('name photo')
+        const postCount = await Post.find({
+            userId: ownerId
+        }).count('postCount')
+
+        const posts = await Post.find({ 
+            userId: ownerId 
+        }).sort({ createdAt: -1 }).skip((req.params.pageId - 1) * 2).limit(2)
+
+        const data = posts.map(post =>{
+            return {
+                _id: post._id,
+                userId: post.userId,
+                course: post.course,
+                title: post.title,
+                notes: post.notes,
+                teacher: post.teacher,
+                deadline: post.deadline,
+                createdAt: post.createdAt,
+                user: { 
+                    name: owner.name,
+                    photo: owner.photo
+                }
+            }
+        })
 
         res.status(200).json({ 
             success: true,
-            data: data
+            data: { data, postCount }
         })
     } catch (err) {
         res.status(200).json({ err })
@@ -31,7 +56,6 @@ const store = async (req, res) => {
     try {
         const post = new Post({
             userId: req.user._id,
-            name: req.user.name,
             title: req.body.title,
             course: req.body.course,
             notes: req.body.notes,
@@ -69,7 +93,6 @@ const update = async (req, res) => {
         const { id } = req.params
         const post = {
             userId: req.user._id,
-            name: req.user.name,
             title: req.body.title,
             course: req.body.course,
             notes: req.body.notes,
