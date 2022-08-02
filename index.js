@@ -10,8 +10,8 @@ const app = express()
 
 //=======Config========//
 if (process.env.NODE_ENV !== 'production') {
-    const morgan = require('morgan')
     const dotenv = require('dotenv')
+    const morgan = require('morgan')
     dotenv.config({ path: './config/config.env' })
     app.use(morgan('dev'))
 }
@@ -24,10 +24,7 @@ app.use(
     cors({
         origin: process.env.ORIGIN_URL,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        allowedHeaders: 'Accept, Accept-Language, Content-Language, Content-Type, Origin, Authorization',
-        exposedHeaders: '*',
-        credentials: true,
-        preflightContinue: true,
+        allowedHeaders: 'Authorization',
         optionsSuccessStatus: 200
     })
 )
