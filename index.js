@@ -11,7 +11,7 @@ const app = express()
 
 
 //=======Config========//
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV !== 'production') {
     dotenv.config({ path: './config/config.env' })
     app.use(morgan('dev'))
 }
@@ -20,7 +20,6 @@ connectDB()
 
 
 //=======Middleware======//
-// app.options('*', cors())
 app.use(
     cors({
         origin: process.env.ORIGIN_URL,
