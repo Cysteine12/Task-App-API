@@ -11,10 +11,10 @@ const app = express()
 
 
 //=======Config========//
-if (process.env.NODE_ENV !== 'production') {
-    dotenv.config({ path: './config/config.env' })
-    app.use(morgan('dev'))
-}
+// if (process.env.NODE_ENV !== 'production') {
+//     dotenv.config({ path: './config/config.env' })
+//     app.use(morgan('dev'))
+// }
 
 connectDB()
 
