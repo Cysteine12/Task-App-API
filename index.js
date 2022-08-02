@@ -19,10 +19,11 @@ connectDB()
 //=======Middleware======//
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
+app.options('*', cors())
 app.use(
     cors({
         origin: process.env.ORIGIN_URL,
-        methods: ['GET', 'POST', 'PUT', 'DELETE']
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
     })
 )
 // app.use((req, res, next) => {
