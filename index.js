@@ -18,24 +18,29 @@ connectDB()
 
 //=======Middleware======//
 // app.options('*', cors())
-// app.use(
-//     cors({
-//         origin: process.env.ORIGIN_URL,
-//         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
-//     })
-// )
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', process.env.ORIGIN_URL)
-    res.header('Access-Control-Allow-Headers', 'Accept, Accept-Language, Content-Language, Content-Type, Origin, Authorization')
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-    res.header('Access-Control-Allow-Credentials', true)
-    res.header('Access-Control-Expose-Headers', '*')
-    if (req.method === 'OPTIONS') {
-        res.send(200)
-    } else {
-        next()
-    }
-})
+app.use(
+    cors({
+        origin: process.env.ORIGIN_URL,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: 'Accept, Accept-Language, Content-Language, Content-Type, Origin, Authorization',
+        exposedHeaders: '*',
+        credentials: true,
+        preflightContinue: true,
+        optionsSuccessStatus: 200
+    })
+)
+// app.use((req, res, next) => {
+//     res.header('Access-Control-Allow-Origin', process.env.ORIGIN_URL)
+//     res.header('Access-Control-Allow-Headers', 'Accept, Accept-Language, Content-Language, Content-Type, Origin, Authorization')
+//     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+//     res.header('Access-Control-Allow-Credentials', true)
+//     res.header('Access-Control-Expose-Headers', '*')
+//     if (req.method === 'OPTIONS') {
+//         res.send(200)
+//     } else {
+//         next()
+//     }
+// })
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'))
