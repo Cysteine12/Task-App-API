@@ -11,7 +11,10 @@ const app = express()
 
 
 //=======Config========//
-dotenv.config({ path: './config/config.env' })
+if (process.env.NODE_ENV === 'development') {
+    dotenv.config({ path: './config/config.env' })
+    app.use(morgan('dev'))
+}
 
 connectDB()
 
@@ -43,7 +46,6 @@ app.use(
 // })
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
-if (process.env.NODE_ENV === 'development') app.use(morgan('dev'))
 
 app.use(session({
     secret: process.env.SESS_SECRET,
