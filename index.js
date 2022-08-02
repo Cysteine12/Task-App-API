@@ -30,7 +30,11 @@ app.use((req, res, next) => {
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
     res.header('Access-Control-Allow-Credentials', true)
     res.header('Access-Control-Expose-Headers', '*')
-    next()
+    if (req.method === 'OPTIONS') {
+        res.send(200)
+    } else {
+        next()
+    }
 })
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
