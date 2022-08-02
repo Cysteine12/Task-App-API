@@ -32,6 +32,7 @@ connectDB()
 //     })
 // )
 app.use((req, res, next) => {
+    console.log('irann')
     res.header('Access-Control-Allow-Origin', process.env.ORIGIN_URL)
     res.header('Access-Control-Allow-Headers', 'Accept, Accept-Language, Content-Language, Content-Type, Origin, Authorization')
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
