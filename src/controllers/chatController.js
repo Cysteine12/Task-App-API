@@ -57,7 +57,7 @@ const getChatList = async (req, res) => {
                     userB: userId
                 }
             ]
-        }).sort({ createdAt: -1 })
+        }).sort({ updatedAt: -1 })
         
         const newChats = await Promise.all(
             chats.map(async (chat) => {
@@ -92,7 +92,7 @@ const getChat = async (req, res) => {
     try {
         const userId = req.user._id
         const friendId = req.body.friendId
-        const data = await Chat.findOne({
+        const chat = await Chat.findOne({
             $or: [
                 {
                     userA: userId,
@@ -104,10 +104,14 @@ const getChat = async (req, res) => {
                 }
             ]
         })
+        const friendData = await User.findById(friendId).select('_id name photo')
         
         res.status(200).json({ 
             success: true,
-            data: data
+            data: {
+                chat, 
+                friendData
+            }
         })
     } catch (err) {
         res.status(404).json({ err })
@@ -161,7 +165,8 @@ const saveChat = async (req, res) => {
                         message: message,
                         createdAt: Date.now()
                     }
-                }
+                },
+                updatedAt: Date.now()
             })
         }
         
