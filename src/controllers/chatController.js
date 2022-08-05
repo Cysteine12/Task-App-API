@@ -14,7 +14,7 @@ const getChatListAlerts = async (req, res) => {
                     userB: userId
                 }
             ]
-        }).limit(10).sort({ createdAt: -1 })
+        }).limit(10).sort({ updatedAt: -1 })
 
         const newChats = await Promise.all(
             chats.map(async (chat) => {
@@ -70,7 +70,7 @@ const getChatList = async (req, res) => {
 
                 return {
                     _id: chat._id,
-                    name: user.name,
+                    name: user.name.split(' ').slice(0, 1).join(' '),
                     photo: user.photo,
                     userA: chat.userA,
                     userB: chat.userB,
