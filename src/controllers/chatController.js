@@ -70,12 +70,12 @@ const getChatList = async (req, res) => {
 
                 return {
                     _id: chat._id,
-                    name: user.name,
+                    name: user.name.split(' ').slice(0, 2).join(' '),
                     photo: user.photo,
                     userA: chat.userA,
                     userB: chat.userB,
                     message: trimMessage,
-                    createdAt: chat.createdAt
+                    updatedAt: chat.updatedAt
                 }
             })
         )
