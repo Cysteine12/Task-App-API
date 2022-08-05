@@ -66,11 +66,11 @@ const getChatList = async (req, res) => {
                 
                 const user = await User.findById(id).select('name photo')
                 const message = chat.message[chat.message.length - 1].message
-                const trimMessage = message.split(' ').slice(0, 4).join(' ')
+                const trimMessage = message.split(' ').slice(0, 6).join(' ')
 
                 return {
                     _id: chat._id,
-                    name: user.name.split(' ').slice(0, 1).join(' '),
+                    name: user.name,
                     photo: user.photo,
                     userA: chat.userA,
                     userB: chat.userB,
